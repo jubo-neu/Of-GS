@@ -21,7 +21,31 @@ These are the official code releases.
 pip install -r requirements.txt
 ```
 2. Getting the data
-- Download the complete [UrbanScene3D](https://s3.eu-central-1.amazonaws.com/avg-projects/differentiable_volumetric_rendering/data/NMR_Dataset.zip).
-- Download the complete [LLFF](https://s3.eu-central-1.amazonaws.com/avg-projects/differentiable_volumetric_rendering/data/NMR_Dataset.zip).
+- Download the complete [UrbanScene3D](https://vcc.tech/UrbanScene3D).
+- Download the complete [LLFF](https://drive.google.com/drive/folders/1cK3UDIJqKAAm7zyrxRYVFJ0BRMgrwhh4).
 - Download the complete [Tanks and Temples](https://www.tanksandtemples.org/).
 - Due to the double-blind policy, our self-collected dataset will be made public with the OneDrive link after the paper is accepted.
+
+## Running
+1. Prepare images for running. Create `examples` to store input views. Create `output_predictions` to store outputs.
+
+- Ensuring that you have the following files:
+```bash
+Of-GS
+|-- examples
+    |-- data_1
+        |-- 00000.png
+        |-- 00001.png
+        |-- ...
+    |-- data_2
+        |-- 00000.png
+        |-- 00001.png
+        |-- ...
+    |-- ...
+|-- output_predictions
+    |-- depth_maps
+    |-- point_clouds
+```
+2. Download the pretrained VGGT-1B model [here](https://huggingface.co/facebook/VGGT-1B/blob/main/model.pt).
+3. Start:
+- 

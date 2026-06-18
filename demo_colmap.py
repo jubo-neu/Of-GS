@@ -1,9 +1,3 @@
-# Copyright (c) Meta Platforms, Inc. and affiliates.
-# All rights reserved.
-#
-# This source code is licensed under the license found in the
-# LICENSE file in the root directory of this source tree.
-
 import random
 import numpy as np
 import glob
@@ -31,7 +25,7 @@ from vggt.utils.helper import create_pixel_coordinate_grid, randomly_limit_trues
 from vggt.dependency.track_predict import predict_tracks
 from vggt.dependency.np_to_pycolmap import batch_np_matrix_to_pycolmap, batch_np_matrix_to_pycolmap_wo_track
 
-import time  # 🔺 新增：导入 time 模块
+import time
 
 
 # TODO: add support for masks
@@ -95,7 +89,7 @@ def run_VGGT(model, images, dtype, resolution=518):
 def demo_fn(args):
     # Print configuration
     print("Arguments:", vars(args))
-    start_time = time.time()  # 🕒 总开始时间
+    start_time = time.time()
 
     # Set seed for reproducibility
     np.random.seed(args.seed)
@@ -141,19 +135,19 @@ def demo_fn(args):
     images = images.to(device)
     original_coords = original_coords.to(device)
     load_images_end = time.time()
-    print(f"✅ Loaded {len(images)} images in {load_images_end - load_images_start:.3f}s")
+    print(f"Loaded {len(images)} images in {load_images_end - load_images_start:.3f}s")
 
     # Run VGGT to estimate camera and depth
     # Run with 518x518 images
-    print("🚀 Running VGGT inference (camera + depth)...")
+    print("Running VGGT inference (camera + depth)...")
     vgg_t_start = time.time()
     extrinsic, intrinsic, depth_map, depth_conf = run_VGGT(model, images, dtype, vggt_fixed_resolution)
     points_3d = unproject_depth_map_to_point_map(depth_map, extrinsic, intrinsic)
     vgg_t_end = time.time()
-    print(f"✅ VGGT inference done in {vgg_t_end - vgg_t_start:.3f}s")
+    print(f"VGGT inference done in {vgg_t_end - vgg_t_start:.3f}s")
 
     if args.use_ba:
-        print("🔁 Running BA + Track prediction...")
+        print("Running BA + Track prediction...")
         ba_start = time.time()
         image_size = np.array(images.shape[-2:])
         scale = img_load_resolution / vggt_fixed_resolution
@@ -179,7 +173,7 @@ def demo_fn(args):
                 fine_tracking=args.fine_tracking,
             )
             track_end = time.time()
-            print(f"   ➡️ Track prediction: {track_end - track_start:.3f}s")
+            print(f"Track prediction: {track_end - track_start:.3f}s")
 
             torch.cuda.empty_cache()
 
@@ -202,7 +196,7 @@ def demo_fn(args):
             points_rgb=points_rgb,
         )
         recon_end = time.time()
-        print(f"   ➡️ COLMAP reconstruction: {recon_end - recon_start:.3f}s")
+        print(f"COLMAP reconstruction: {recon_end - recon_start:.3f}s")
 
         if reconstruction is None:
             raise ValueError("No reconstruction can be built with BA")
@@ -212,13 +206,13 @@ def demo_fn(args):
         ba_options = pycolmap.BundleAdjustmentOptions()
         pycolmap.bundle_adjustment(reconstruction, ba_options)
         ba_opt_end = time.time()
-        print(f"   ➡️ Bundle Adjustment: {ba_opt_end - ba_opt_start:.3f}s")
+        print(f"Bundle Adjustment: {ba_opt_end - ba_opt_start:.3f}s")
 
         ba_end = time.time()
-        print(f"✅ BA pipeline done in {ba_end - ba_start:.3f}s")
+        print(f"BA pipeline done in {ba_end - ba_start:.3f}s")
         reconstruction_resolution = img_load_resolution
     else:
-        print("📦 Running feedforward reconstruction (no BA)...")
+        print("Running feedforward reconstruction (no BA)...")
         feed_start = time.time()
         conf_thres_value = args.conf_thres_value
         max_points_for_colmap = 100000  # randomly sample 3D points
@@ -258,10 +252,10 @@ def demo_fn(args):
             camera_type=camera_type,
         )
         colmap_end = time.time()
-        print(f"   ✅ COLMAP conversion: {colmap_end - colmap_start:.3f}s")
+        print(f"COLMAP conversion: {colmap_end - colmap_start:.3f}s")
 
         feed_end = time.time()
-        print(f"✅ Feedforward pipeline done in {feed_end - feed_start:.3f}s")
+        print(f"Feedforward pipeline done in {feed_end - feed_start:.3f}s")
 
         reconstruction_resolution = vggt_fixed_resolution
 
@@ -276,7 +270,7 @@ def demo_fn(args):
         shared_camera=shared_camera,
     )
     rename_end = time.time()
-    print(f"✅ Rename/rescale done in {rename_end - rename_start:.3f}s")
+    print(f"Rename/rescale done in {rename_end - rename_start:.3f}s")
 
     print(f"Saving reconstruction to {args.scene_dir}/sparse")
     save_start = time.time()
@@ -287,10 +281,10 @@ def demo_fn(args):
     # Save point cloud for fast visualization
     trimesh.PointCloud(points_3d, colors=points_rgb).export(os.path.join(args.scene_dir, "sparse/points.ply"))
     save_end = time.time()
-    print(f"✅ Save done in {save_end - save_start:.3f}s")
+    print(f"Save done in {save_end - save_start:.3f}s")
 
     total_time = time.time() - start_time
-    print(f"\n🎉 Total execution time: {total_time:.3f} seconds")
+    print(f"\n Total execution time: {total_time:.3f} seconds")
 
     return True
 
